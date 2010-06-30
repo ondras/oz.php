@@ -66,7 +66,7 @@
 		public function __construct() {
 			$this->xml = new DOMDocument();
 			foreach (self::$_fractions as $name=>$value) {
-				$newname = "@(?<=\\s|^)".$name."(?=\\s|$)@";
+				$newname = "@(?<=[^\\d]|^)".$name."(?=[^\\d]|$)@";
 				$this->fractions[$newname] = $value;
 			}
 		}
