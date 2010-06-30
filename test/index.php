@@ -21,11 +21,12 @@
 			$this->output->setLanguage("cz");
 			$this->output->setTemplate("xsl/test.xsl");
 
-			$str = $this->output->translate("-> <- <-> => <= <=> >> << -- --- 640x480 (c) (tm) (r)", V::FRACTIONS + V::TYPO);
+			$str = $this->output->translate("3/4 -> <- <-> => <= <=> >> << -- --- 640x480 (c) (tm) (r) 1/2 a1/2 11/2 1/2", V::FRACTIONS + V::TYPO);
 			$str .= " <em>asdasdasd</em>";
 			$data = array(
 				"a"=>array(
-					"b"=>"c", 
+					"b"=>"c",
+					"config"=>$this->input->getConfig(),
 					""=>$str,
 				)
 			);

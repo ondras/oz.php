@@ -10,6 +10,7 @@
 		public function query($query, $values = array()) {
 			$s = $this->db->prepare($query);
 			$s->execute($values);
+			$s->setFetchMode(PDO::FETCH_ASSOC);
 			return $s->fetchAll();
 		}
 	}
@@ -18,12 +19,13 @@
 		protected $template = null;
 		protected $language = null;
 		protected $xml = null;
+		protected $fractions = null;
 
 		const FRACTIONS = 1;
 		const NBSP		= 2;
 		const TYPO		= 4;
 		
-		protected static $fractions = array(
+		protected static $_fractions = array(
 			"1/2" => "½",
 			"1/4" => "¼",
 			"3/4" => "¾",
@@ -63,6 +65,10 @@
 		
 		public function __construct() {
 			$this->xml = new DOMDocument();
+			foreach (self::$_fractions as $name=>$value) {
+				$newname = "@(?<=\\s|^)".$name."(?=\\s|$)@";
+				$this->fractions[$newname] = $value;
+			}
 		}
 		
 		public function translate($what, $mode) {
@@ -71,7 +77,7 @@
 				$str = preg_replace("/(?<=\s)([A-Z]) (?=\S)/i", "$1".html_entity_decode("&nbsp;", ENT_QUOTES, "utf-8"), $str);
 			}
 			if ($mode & self::FRACTIONS) {
-				$str = str_replace(array_keys(self::$fractions), array_values(self::$fractions), $str);
+				$str = preg_replace(array_keys($this->fractions), array_values($this->fractions), $str);
 			}
 			if ($mode & self::TYPO) {
 				$str = str_replace(array_keys(self::$typo), array_values(self::$typo), $str);
@@ -102,11 +108,12 @@
 		}
 		
 		protected function arrayToNode($array, $nodeName = null) {
-			$node = ($nodeName ? $this->xml->createElement($nodeName) : $this->xml->createDocumentFragment());
+			$node = ($nodeName === null ? $this->xml->createDocumentFragment() : $this->xml->createElement($nodeName));
 			foreach ($array as $name=>$value) {
-				if ($name == "") {
+				if ($name === "") {
 					$node->appendChild($this->xml->createCDATASection($value));
 				} else if (is_array($value)) {
+					if (is_numeric($name)) { $name = "item"; }
 					$node->appendChild($this->arrayToNode($value, $name));
 				} else {
 					$node->setAttribute($name, $value);
