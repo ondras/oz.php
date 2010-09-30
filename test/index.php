@@ -3,17 +3,28 @@
 	error_reporting(E_ALL);
 	include("../oz.php");
 	
+	class VF_Test extends VF {
+		public function apply($str) {
+			return $str.$str;
+		}
+	}
+	
 	class M_Test extends M {
 		public function __construct($name) {
-			parent::__construct("sqlite:" . $name . ".sqlite");
+//			parent::__construct("sqlite:" . $name . ".sqlite");
 		}
 		
 		public function getConfig() {
-			return $this->query("SELECT * FROM config");
+//			return $this->query("SELECT * FROM config");
 		}
 	}
 	
 	class V_Test extends V {
+		public function __construct() {
+			parent::__construct();
+			$this->addFilter(new VF_Test());
+		}
+		
 	}
 	
 	class C_Test extends C {
@@ -21,7 +32,7 @@
 			$this->output->setLanguage("cz");
 			$this->output->setTemplate("xsl/test.xsl");
 
-			$str = $this->output->translate("3/4 -> <- <-> => <= <=> >> << -- --- 640x480 (c) (tm) (r) 1/2 a1/2 11/2 1/2", V::FRACTIONS + V::TYPO);
+			$str = "3/4 -> <- <-> => <= <=> >> << -- --- 640x480 (c) (tm) (r) 1/2 a1/2 11/2 1/2";
 			$str .= " <em>asdasdasd</em>";
 			$data = array(
 				"a"=>array(
@@ -39,4 +50,3 @@
 	$output = new V_Test();
 	new C_Test($input, $output);
 ?>
-

@@ -16,6 +16,7 @@
 	}
 	
 	class V {
+		protected $filters = array();
 		protected $template = null;
 		protected $language = null;
 		protected $xml = null;
@@ -98,7 +99,12 @@
 			$this->xml->appendChild($this->arrayToNode($data));
 		}
 		
+		public function addFilter($filter) {
+			$this->filters[] = $filter;
+		}
+		
 		public function output() {
+			echo $this->xml->saveXML(); return;
 			$xsl = new DOMDocument();
 			$xsl->load($this->template, LIBXML_NOCDATA);
 			$xslt = new XSLTProcessor();
@@ -109,17 +115,30 @@
 		
 		protected function arrayToNode($array, $nodeName = null) {
 			$node = ($nodeName === null ? $this->xml->createDocumentFragment() : $this->xml->createElement($nodeName));
+
 			foreach ($array as $name=>$value) {
-				if ($name === "") {
-					$node->appendChild($this->xml->createCDATASection($value));
-				} else if (is_array($value)) {
+				if (is_array($value)) {
 					if (is_numeric($name)) { $name = "item"; }
 					$node->appendChild($this->arrayToNode($value, $name));
 				} else {
-					$node->setAttribute($name, $value);
+					$value = $this->filter($value);
+					if ($name === "") {
+						$node->appendChild($this->xml->createCDATASection($value));
+					} else {
+						$node->setAttribute($name, $value);
+					}
 				}
 			}
+
 			return $node;
+		}
+		
+		protected function filter($str) {
+			$s = $str;
+			for ($i=0;$i<count($this->filters);$i++) {
+				$s = $this->filters[$i]->apply($s);
+			}
+			return $s;
 		}
 	}
 	
@@ -128,8 +147,8 @@
 		protected $output = null;
 	
 		/**
-		 * @param {M_Base} input
-		 * @param {V_Base} output
+		 * @param {M} input
+		 * @param {V} output
 		 */
 		public function __construct($input, $output) {
 			$this->input = $input;
@@ -141,5 +160,13 @@
 			echo $this->output->output();
 		}
 	}
-?>
+	
+	class VF {
+		public function __construct() {
+		}
 
+		public function apply($str) {
+			return $str;
+		}
+	}
+?>
