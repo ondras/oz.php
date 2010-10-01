@@ -3,26 +3,22 @@
 	error_reporting(E_ALL);
 	include("../oz.php");
 	
-	class VF_Test extends VF {
-		public function apply($str) {
-			return $str.$str;
-		}
-	}
-	
 	class M_Test extends M {
 		public function __construct($name) {
-//			parent::__construct("sqlite:" . $name . ".sqlite");
+			parent::__construct("sqlite:" . $name . ".sqlite");
 		}
 		
 		public function getConfig() {
-//			return $this->query("SELECT * FROM config");
+			return $this->query("SELECT * FROM config");
 		}
 	}
 	
 	class V_Test extends V {
 		public function __construct() {
 			parent::__construct();
-			$this->addFilter(new VF_Test());
+			$this->addFilter(new VF_TYPO());
+			$this->addFilter(new VF_NBSP());
+			$this->addFilter(new VF_FRACTIONS());
 		}
 		
 	}

@@ -20,73 +20,11 @@
 		protected $template = null;
 		protected $language = null;
 		protected $xml = null;
-		protected $fractions = null;
 
-		const FRACTIONS = 1;
-		const NBSP		= 2;
-		const TYPO		= 4;
-		
-		protected static $_fractions = array(
-			"1/2" => "½",
-			"1/4" => "¼",
-			"3/4" => "¾",
-			"1/3" => "⅓",
-			"2/3" => "⅔",
-			"1/5" => "⅕",
-			"2/5" => "⅖",
-			"3/5" => "⅗",
-			"4/5" => "⅘",
-			"1/6" => "⅙",
-			"5/6" => "⅚",
-			"1/8" => "⅛",
-			"3/8" => "⅜",
-			"5/8" => "⅝",
-			"7/8" => "⅞"
-		);
-		
-		protected static $typo = array(
-			"<->" => "↔",
-			"->" => "→",
-			"<-" => "←",
-			"<=>" => "⇔",
-			"=>" => "⇒",
-			"<=" => "⇐",
-			">>" => "»",
-			"<<" => "«",
-			"---" => "—",
-			"--" => "–",
-			"(c)" => "©",
-			"(C)" => "©",
-			"(tm)" => "™",
-			"(TM)" => "™",
-			"(r)" => "®",
-			"(R)" => "®",
-			"..." => "…"
-		);
-		
 		public function __construct() {
 			$this->xml = new DOMDocument();
-			foreach (self::$_fractions as $name=>$value) {
-				$newname = "@(?<=[^\\d]|^)".$name."(?=[^\\d]|$)@";
-				$this->fractions[$newname] = $value;
-			}
 		}
 		
-		public function translate($what, $mode) {
-			$str = $what;
-			if ($mode & self::NBSP) { 
-				$str = preg_replace("/(?<=\s)([A-Z]) (?=\S)/i", "$1".html_entity_decode("&nbsp;", ENT_QUOTES, "utf-8"), $str);
-			}
-			if ($mode & self::FRACTIONS) {
-				$str = preg_replace(array_keys($this->fractions), array_values($this->fractions), $str);
-			}
-			if ($mode & self::TYPO) {
-				$str = str_replace(array_keys(self::$typo), array_values(self::$typo), $str);
-				$str = preg_replace("/(?<=\d)x(?=\d)/i", "×", $str);
-			}
-			return $str;
-		}
-
 		public function setTemplate($template) {
 			$this->template = $template;
 		}
@@ -104,7 +42,6 @@
 		}
 		
 		public function output() {
-			echo $this->xml->saveXML(); return;
 			$xsl = new DOMDocument();
 			$xsl->load($this->template, LIBXML_NOCDATA);
 			$xslt = new XSLTProcessor();
@@ -134,11 +71,10 @@
 		}
 		
 		protected function filter($str) {
-			$s = $str;
 			for ($i=0;$i<count($this->filters);$i++) {
-				$s = $this->filters[$i]->apply($s);
+				$str = $this->filters[$i]->apply($str);
 			}
-			return $s;
+			return $str;
 		}
 	}
 	
@@ -167,6 +103,74 @@
 
 		public function apply($str) {
 			return $str;
+		}
+	}
+	
+	class VF_TYPO extends VF {
+		protected static $typo = array(
+			"<->" => "↔",
+			"->" => "→",
+			"<-" => "←",
+			"<=>" => "⇔",
+			"=>" => "⇒",
+			"<=" => "⇐",
+			">>" => "»",
+			"<<" => "«",
+			"---" => "—",
+			"--" => "–",
+			"(c)" => "©",
+			"(C)" => "©",
+			"(tm)" => "™",
+			"(TM)" => "™",
+			"(r)" => "®",
+			"(R)" => "®",
+			"..." => "…"
+		);
+		
+		public function apply($str) {
+			$str = str_replace(array_keys(self::$typo), array_values(self::$typo), $str);
+			return preg_replace("/(?<=\d)x(?=\d)/i", "×", $str);
+		}
+	}
+	
+	class VF_NBSP extends VF {
+		public function apply($str) {
+			return preg_replace("/(?<=\s)([A-Z]) (?=\S)/i", "$1".html_entity_decode("&nbsp;", ENT_QUOTES, "utf-8"), $str);
+		}
+	}
+
+	class VF_FRACTIONS extends VF {
+		protected $fractions = null;
+
+		protected static $_fractions = array(
+			"1/2" => "½",
+			"1/4" => "¼",
+			"3/4" => "¾",
+			"1/3" => "⅓",
+			"2/3" => "⅔",
+			"1/5" => "⅕",
+			"2/5" => "⅖",
+			"3/5" => "⅗",
+			"4/5" => "⅘",
+			"1/6" => "⅙",
+			"5/6" => "⅚",
+			"1/8" => "⅛",
+			"3/8" => "⅜",
+			"5/8" => "⅝",
+			"7/8" => "⅞"
+		);
+		
+		public function __construct() {
+			parent::__construct();
+			$this->xml = new DOMDocument();
+			foreach (self::$_fractions as $name=>$value) {
+				$newname = "@(?<=[^\\d]|^)".$name."(?=[^\\d]|$)@";
+				$this->fractions[$newname] = $value;
+			}
+		}
+
+		public function apply($str) {
+			return preg_replace(array_keys($this->fractions), array_values($this->fractions), $str);
 		}
 	}
 ?>
