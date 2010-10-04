@@ -33,8 +33,8 @@
 			$data = array(
 				"a"=>array(
 					"b"=>"c",
-					"config"=>$this->input->getConfig(),
 					""=>$str,
+					"config"=>$this->input->getConfig()
 				)
 			);
 			$this->output->setData($data);

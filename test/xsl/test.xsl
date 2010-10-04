@@ -11,8 +11,36 @@
 		omit-xml-declaration="yes" 
 		doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
 		doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" />
+		
+	<xsl:template name="copy">
+		<xsl:text>&lt;</xsl:text>
+		<xsl:value-of select="name()" />
+		<xsl:text> </xsl:text>
+		<xsl:for-each select="@*">
+			<xsl:value-of select="name()" />
+			<xsl:text>="</xsl:text>
+			<xsl:value-of select="." />
+			<xsl:text>"</xsl:text>
+		</xsl:for-each>
+		<xsl:text>&gt;
+</xsl:text>
 
-	<xsl:template match="/*">	
+		<xsl:for-each select="*">
+			<xsl:text>	</xsl:text>
+			<xsl:call-template name="copy" />
+		</xsl:for-each>
+		
+		<xsl:value-of select="." />
+		<xsl:text>
+</xsl:text>
+		
+		<xsl:text>&lt;/</xsl:text>
+		<xsl:value-of select="name()" />
+		<xsl:text>&gt;
+</xsl:text>
+	</xsl:template>
+
+	<xsl:template match="/*">
 	<html>
 		<head>
 			<title><xsl:value-of select="name()" /></title>
@@ -26,10 +54,10 @@
 		
 		</h1>
 			
-		<p><xsl:value-of select="." disable-output-escaping="yes"/></p>
+		<p><xsl:value-of select="." disable-output-escaping="yes" /></p>
 
 		<pre>
-			<xsl:copy-of select="config" />
+			<xsl:call-template name="copy" select="/" />
 		</pre>
 		
 		</body>

@@ -5,7 +5,7 @@
 		public function __construct($dsn, $username = "", $password = "") {
 			$this->db = new PDO($dsn, $username, $password);
 			$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  		}
+		}
 		
 		public function query($query, $values = array()) {
 			$s = $this->db->prepare($query);
@@ -55,8 +55,14 @@
 
 			foreach ($array as $name=>$value) {
 				if (is_array($value)) {
-					if (is_numeric($name)) { $name = "item"; }
-					$node->appendChild($this->arrayToNode($value, $name));
+					$test = each($value);
+					if (is_numeric($test[0])) { /* numbered array - set of children */
+						foreach ($value as $child) {
+							$node->appendChild($this->arrayToNode($child, $name));
+						}
+					} else { /* associative array - one child */
+						$node->appendChild($this->arrayToNode($value, $name));
+					}
 				} else {
 					$value = $this->filter($value);
 					if ($name === "") {
