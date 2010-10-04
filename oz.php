@@ -87,7 +87,7 @@
 	class C {
 		protected $input = null;
 		protected $output = null;
-	
+
 		/**
 		 * @param {M} input
 		 * @param {V} output
