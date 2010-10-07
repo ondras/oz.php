@@ -85,22 +85,69 @@
 	}
 	
 	class C {
-		protected $input = null;
-		protected $output = null;
+		const GET = 1;
+		const POST = 2;
+		const COOKIE = 4;
+
+		protected static $BASE = "";
+		protected $model = null;
+		protected $view = null;
+		protected $dispatch_table = array();
 
 		/**
-		 * @param {M} input
-		 * @param {V} output
+		 * @param {M} model
+		 * @param {V} view
 		 */
-		public function __construct($input, $output) {
-			$this->input = $input;
-			$this->output = $output;
-			$this->dispatch();
+		public function __construct($model, $view) {
+			$this->model = $model;
+			$this->view = $view;
 		}
 		
-		public function dispatch() {
-			echo $this->output->output();
+		protected function addMethod($method, $methodName) {
+			$this->dispatch_table[$method] = $methodName;
 		}
+		
+		protected function dispatch() {
+			$method = substr($_SERVER["REQUEST_URI"], strlen($this::$BASE));
+			
+			if (isset($this->dispatch_table[$method])) {
+				$methodName = $this->dispatch_table[$method];
+				$this->$methodName();
+			} else {
+				$this->error(404);
+			}
+		}
+
+		/**
+		 * @param {string} name
+		 * @param {int} where Mix of GET/POST/COOKIE constants
+		 * @param {any} default Used when no value is specified; used to coerce return type
+		 * @returns {typeof($default)}
+		 */
+		protected function requestValue($name, $where, $default = null) {
+			$value = $default;
+			if (($where & self::GET) && isset($_GET[$name])) {
+				$value = $_GET[$name];
+			} elseif (($where & self::POST) && isset($_POST[$name])) {
+				$value = $_POST[$name];
+			} elseif (($where & self::COOKIE) && isset($_COOKIE[$name])) {
+				$value = $_COOKIE[$name];
+			} else {
+				return $value;
+			}
+			
+			if (!is_null($default)) { settype($value, gettype($default)); }
+			return $value;
+		}
+		
+		protected function status($code) {
+			header("HTTP/1.1 " . $code, true, $code);
+		}
+		
+		protected function error($code) {
+			$this->status($code);
+		}
+		
 	}
 	
 	class VF {
