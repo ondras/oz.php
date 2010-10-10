@@ -1,5 +1,5 @@
 <?php
-	class M {
+	class DB {
 		protected $db = null;
 		
 		public function __construct($dsn, $username = "", $password = "") {
@@ -15,7 +15,7 @@
 		}
 	}
 	
-	class V {
+	class XML {
 		protected $filters = array();
 		protected $template = null;
 		protected $language = null;
@@ -41,13 +41,19 @@
 			$this->filters[] = $filter;
 		}
 		
-		public function output() {
-			$xsl = new DOMDocument();
-			$xsl->load($this->template, LIBXML_NOCDATA);
-			$xslt = new XSLTProcessor();
-			$xslt->importStylesheet($xsl);
-			if ($this->language) { $xslt->setParameter("", "language", $this->language); }
-			return $xslt->transformToXML($this->xml); 
+		public function toString() {
+			$xml = null;
+			if ($this->template) {
+				$xsl = new DOMDocument();
+				$xsl->load($this->template, LIBXML_NOCDATA);
+				$xslt = new XSLTProcessor();
+				$xslt->importStylesheet($xsl);
+				if ($this->language) { $xslt->setParameter("", "language", $this->language); }
+				$xml = $xslt->transformToDoc($this->xml); 
+			} else {
+				$xml = $this->xml;
+			}
+			return $xml->saveXML();
 		}
 		
 		protected function arrayToNode($array, $nodeName = null) {
@@ -84,32 +90,28 @@
 		}
 	}
 	
-	class C {
+	class APP {
 		const GET = 1;
 		const POST = 2;
 		const COOKIE = 4;
 
-		protected static $BASE = "";
-		protected $model = null;
-		protected $view = null;
+		protected $BASE = "";
 		protected $dispatch_table = array();
 
-		/**
-		 * @param {M} model
-		 * @param {V} view
-		 */
-		public function __construct($model, $view) {
-			$this->model = $model;
-			$this->view = $view;
-		}
-		
-		protected function addMethod($method, $methodName) {
-			$this->dispatch_table[$method] = $methodName;
+		public function __construct() {
+			/* detect base path */
+			if (isset($_SERVER["DOCUMENT_ROOT"]) && isset($_SERVER["SCRIPT_FILENAME"])) { 
+				$root = $_SERVER["DOCUMENT_ROOT"];
+				$cwd = dirname($_SERVER["SCRIPT_FILENAME"]);
+
+				if (strpos($cwd, $root) === 0) { /* found! */
+					$this->BASE = substr($cwd, strlen($root));
+				}
+			}
 		}
 		
 		protected function dispatch() {
-			$method = substr($_SERVER["REQUEST_URI"], strlen($this::$BASE));
-			
+			$method = substr($_SERVER["REQUEST_URI"], strlen($this->BASE));
 			if (isset($this->dispatch_table[$method])) {
 				$methodName = $this->dispatch_table[$method];
 				$this->$methodName();
@@ -150,7 +152,7 @@
 		
 	}
 	
-	class VF {
+	class FILTER {
 		public function __construct() {
 		}
 
@@ -159,7 +161,7 @@
 		}
 	}
 	
-	class VF_TYPO extends VF {
+	class FILTER_TYPO extends FILTER {
 		protected static $typo = array(
 			"<->" => "↔",
 			"->" => "→",
@@ -186,13 +188,13 @@
 		}
 	}
 	
-	class VF_NBSP extends VF {
+	class FILTER_NBSP extends FILTER {
 		public function apply($str) {
 			return preg_replace("/(?<=\s)([A-Z]) (?=\S)/i", "$1".html_entity_decode("&nbsp;", ENT_QUOTES, "utf-8"), $str);
 		}
 	}
 
-	class VF_FRACTIONS extends VF {
+	class FILTER_FRACTIONS extends FILTER {
 		protected $fractions = null;
 
 		protected static $_fractions = array(

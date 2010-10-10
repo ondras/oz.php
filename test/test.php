@@ -1,5 +1,5 @@
 <?php
-	class M_Test extends M {
+	class DB_Test extends DB {
 		public function __construct($name) {
 			parent::__construct("sqlite:" . $name . ".sqlite");
 		}
@@ -9,45 +9,50 @@
 		}
 	}
 	
-	class V_Test extends V {
+	class XML_Test extends XML {
 		public function __construct() {
 			parent::__construct();
-			$this->addFilter(new VF_TYPO());
-			$this->addFilter(new VF_NBSP());
-			$this->addFilter(new VF_FRACTIONS());
+			$this->addFilter(new FILTER_TYPO());
+			$this->addFilter(new FILTER_NBSP());
+			$this->addFilter(new FILTER_FRACTIONS());
 		}
 		
 	}
 	
-	class C_Test extends C {
-		protected static $BASE = "/oz-php/test";
+	class APP_Test extends APP {
+		protected $db = null;
+		protected $template = null;
+		protected $dispatch_table = array(
+			"/" => "test"
+		);
 		
-		public function __construct($model, $view) {
-			parent::__construct($model, $view);
-			$this->view->setLanguage("cz");
+		public function __construct() {
+			parent::__construct();
+			$this->db = new DB_Test("test");
+			$this->template = new XML_Test();
+			$this->template->setLanguage("cz");
 			
-			$this->addMethod("/", "test");
 			$this->dispatch();
 		}
 
 		protected function test() {
-			$this->view->setTemplate("xsl/test.xsl");
+			$this->template->setTemplate("xsl/test.xsl");
 			$str = "3/4 -> <- <-> => <= <=> >> << -- --- 640x480 (c) (tm) (r) 1/2 a1/2 11/2 1/2";
 			$str .= " <em>asdasdasd</em>";
 			$data = array(
 				"a"=>array(
 					"b"=>"c",
 					""=>$str,
-					"config"=>$this->model->getConfig()
+					"config"=>$this->db->getConfig()
 				)
 			);
-			$this->view->setData($data);
-			echo $this->view->output();	
+			$this->template->setData($data);
+			echo $this->template->toString();	
 		}
 		
 		protected function error($code) {
 			parent::error($code);
-			echo "wtf.";
+			echo "<h1>Error $code</h1>";
 		}
 	}
 ?>
