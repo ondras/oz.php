@@ -40,13 +40,16 @@
 
 	<xsl:template name="indent">
 		<xsl:param name="amount" />
-		<xsl:for-each select="//node()[position() &lt; $amount]">
+		<xsl:if test="$amount &gt; 0">
 			<xsl:text>  </xsl:text>
-		</xsl:for-each>
+			<xsl:call-template name="indent">
+				<xsl:with-param name="amount" select="$amount - 1" />
+			</xsl:call-template>
+		</xsl:if> 
 	</xsl:template>
 	
 	<xsl:template name="xml">
-		<xsl:param name="depth" select="2" />
+		<xsl:param name="depth" select="0" />
 		
 		<xsl:call-template name="indent"><xsl:with-param name="amount" select="$depth" /></xsl:call-template>
 		<xsl:text>&lt;</xsl:text>
