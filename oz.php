@@ -18,7 +18,7 @@
 	class XML {
 		protected $filters = array();
 		protected $template = null;
-		protected $language = null;
+		protected $parameters = array();
 		protected $xml = null;
 
 		public function __construct() {
@@ -29,8 +29,8 @@
 			$this->template = $template;
 		}
 		
-		public function setLanguage($language) {
-			$this->language = $language;
+		public function setParameter($name, $value) {
+			$this->parameters[$name] = $value;
 		}
 		
 		public function setData($data) {
@@ -48,7 +48,9 @@
 				$xsl->load($this->template, LIBXML_NOCDATA);
 				$xslt = new XSLTProcessor();
 				$xslt->importStylesheet($xsl);
-				if ($this->language) { $xslt->setParameter("", "language", $this->language); }
+				foreach ($this->parameters as $name=>$value) {
+					$xslt->setParameter("", $name, $value);
+				}
 				$xml = $xslt->transformToDoc($this->xml); 
 			} else {
 				$xml = $this->xml;

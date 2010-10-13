@@ -23,14 +23,16 @@
 		protected $db = null;
 		protected $template = null;
 		protected $dispatch_table = array(
-			"/" => "test"
+			"/" => "test",
+			"/a" => "test",
 		);
 		
 		public function __construct() {
 			parent::__construct();
 			$this->db = new DB_Test("test");
 			$this->template = new XML_Test();
-			$this->template->setLanguage("cz");
+			$this->template->setParameter("LANGUAGE", "cz");
+			$this->template->setParameter("BASE", $this->BASE);
 			
 			$this->dispatch();
 		}
