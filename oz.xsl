@@ -51,37 +51,62 @@
 	<xsl:template name="xml">
 		<xsl:param name="depth" select="0" />
 		
+		<!-- start tag name -->
 		<xsl:call-template name="indent"><xsl:with-param name="amount" select="$depth" /></xsl:call-template>
 		<xsl:text>&lt;</xsl:text>
 		<xsl:value-of select="name()" />
-		<xsl:text> </xsl:text>
+		
+		<!-- attributes -->
 		<xsl:for-each select="@*">
+			<xsl:text> </xsl:text>
 			<xsl:value-of select="name()" />
 			<xsl:text>="</xsl:text>
 			<xsl:value-of select="." />
-			<xsl:text>" </xsl:text>
-		</xsl:for-each>
-		<xsl:text>&gt;
-</xsl:text>
-
-		<xsl:for-each select="*">
-			<xsl:call-template name="xml">
-				<xsl:with-param name="depth" select="$depth + 1" />
-			</xsl:call-template>
+			<xsl:text>"</xsl:text>
 		</xsl:for-each>
 		
-		<xsl:if test=". != ''">
-			<xsl:call-template name="indent"><xsl:with-param name="amount" select="$depth + 1" /></xsl:call-template>
-			<xsl:value-of select="." />
-			<xsl:text>
+		<xsl:choose>
+			<!-- empty -->
+			<xsl:when test="not(node())">
+				<xsl:text>/</xsl:text>
+			</xsl:when>
+			
+			<!-- not empty -->
+			<xsl:otherwise>
+				<xsl:text>&gt;
 </xsl:text>
-		</xsl:if>
 		
-		<xsl:call-template name="indent"><xsl:with-param name="amount" select="$depth" /></xsl:call-template>
-		<xsl:text>&lt;/</xsl:text>
-		<xsl:value-of select="name()" />
+				<!-- children -->
+				<xsl:for-each select="* | text()">
+					<xsl:choose>
+						<!-- text content -->
+						<xsl:when test="name() = ''">
+							<xsl:call-template name="indent"><xsl:with-param name="amount" select="$depth + 1" /></xsl:call-template>
+							<xsl:value-of select="." />
+							<xsl:text>
+</xsl:text>
+						</xsl:when>
+						
+						<!-- node content -->
+						<xsl:otherwise>
+							<xsl:call-template name="xml">
+								<xsl:with-param name="depth" select="$depth + 1" />
+							</xsl:call-template>
+						</xsl:otherwise>
+					</xsl:choose>
+				</xsl:for-each>
+		
+				<!-- end tag name -->
+				<xsl:call-template name="indent"><xsl:with-param name="amount" select="$depth" /></xsl:call-template>
+				<xsl:text>&lt;/</xsl:text>
+				<xsl:value-of select="name()" />
+			</xsl:otherwise>
+		</xsl:choose>
+		
+		<!-- end -->
 		<xsl:text>&gt;
 </xsl:text>
+		
 	</xsl:template>
 
 </xsl:stylesheet>

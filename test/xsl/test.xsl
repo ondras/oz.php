@@ -68,7 +68,7 @@
 						<td>Localization is done via XSLT</td>
 					</tr>
 					<tr>
-						<td>Link</td>
+						<td>Internal link</td>
 						<td>
 							<xsl:call-template name="html-link">
 								<xsl:with-param name="name" select="'link to method a'" />
@@ -88,7 +88,7 @@
 						<td>No prefix used</td>
 					</tr>
 					<tr>
-						<td>XML source</td>
+						<td>Formatted XML source</td>
 						<td>
 							<pre>
 								<xsl:call-template name="xml" select="/" />
@@ -104,6 +104,15 @@
 						</td>
 						<td>Typographic replacements</td>
 					</tr>
+
+					<tr>
+						<td>Disable output escaping</td>
+						<td>
+							<xsl:value-of select="@doe" disable-output-escaping="yes" />
+						</td>
+						<td>Rich content</td>
+					</tr>
+
 				</tbody>
 			</table>
 
