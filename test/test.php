@@ -12,9 +12,10 @@
 	class APP_Test extends APP {
 		protected $db = null;
 		protected $template = null;
-		protected $dispatch_table = array(
+		protected $get_table = array(
 			"/" => "test",
 			"/a" => "test",
+			"/b" => "test_redirect",
 		);
 		
 		public function __construct() {
@@ -43,6 +44,10 @@
 			);
 			$this->template->setData($data);
 			echo $this->template->toString();
+		}
+		
+		protected function test_redirect() {
+			$this->redirect("/a");
 		}
 		
 		protected function error($code) {

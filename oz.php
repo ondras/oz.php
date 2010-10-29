@@ -98,7 +98,8 @@
 		const COOKIE = 4;
 
 		protected $BASE = "";
-		protected $dispatch_table = array();
+		protected $get_table = array();
+		protected $post_table = array();
 
 		public function __construct() {
 			/* detect base path */
@@ -113,9 +114,11 @@
 		}
 		
 		protected function dispatch() {
+			$http_method = strtolower($_SERVER["REQUEST_METHOD"]);
 			$method = substr($_SERVER["REQUEST_URI"], strlen($this->BASE));
-			if (isset($this->dispatch_table[$method])) {
-				$methodName = $this->dispatch_table[$method];
+			$table = ($http_method == "post" ? $this->post_table : $this->get_table);
+			if (isset($table[$method])) {
+				$methodName = $table[$method];
 				$this->$methodName();
 			} else {
 				$this->error(404);
@@ -142,6 +145,13 @@
 			
 			if (!is_null($default)) { settype($value, gettype($default)); }
 			return $value;
+		}
+		
+		protected function redirect($location) {
+			if (substr($location, 0, 1) == "/") {
+				$location = $this->BASE . $location;
+			}
+			header("Location: " . $location);
 		}
 		
 		protected function status($code) {
