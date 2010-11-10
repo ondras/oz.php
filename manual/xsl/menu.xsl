@@ -31,9 +31,14 @@
 				</xsl:call-template>
 			</li>
 			<li>
+				Sources: 
 				<xsl:call-template name="html-link">
-					<xsl:with-param name="value" select="'Application source'" />
-					<xsl:with-param name="href" select="'/test.phps'" />
+					<xsl:with-param name="value" select="'index.php'" />
+					<xsl:with-param name="href" select="'/index.phps'" />
+				</xsl:call-template>, 
+				<xsl:call-template name="html-link">
+					<xsl:with-param name="value" select="'Application class'" />
+					<xsl:with-param name="href" select="'/manual.phps'" />
 				</xsl:call-template>
 			</li>
 		</ul>

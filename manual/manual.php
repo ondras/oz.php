@@ -21,7 +21,7 @@
 		public function __construct() {
 			parent::__construct();
 
-			$this->db = new DB_Test("test");
+			$this->db = new DB_Test("manual");
 			$this->template = new XML();
 			$this->template->setParameter("LANGUAGE", "cz");
 			$this->template->setParameter("BASE", $this->BASE);
