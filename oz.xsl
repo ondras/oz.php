@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:template name="_">
 		<xsl:param name="key" />
-		<xsl:variable name="str" select="$strings//str[@name = $key]" />
+		<xsl:variable name="str" select="$STRINGS//str[@name = $key]" />
 		<xsl:choose>
 			<xsl:when test="$str[lang($LANGUAGE)]">
 				<xsl:for-each select="$str[lang($LANGUAGE)][1]/node()">
@@ -18,7 +18,7 @@
 	
 	<xsl:template name="html-link">
 		<xsl:param name="href" select="''" />
-		<xsl:param name="name" />
+		<xsl:param name="value" />
 		<xsl:element name="a">
 			<xsl:attribute name="href">
 				<xsl:if test="substring($href, 1, 1) = '/'">
@@ -26,7 +26,7 @@
 				</xsl:if>
 				<xsl:value-of select="$href"/>
 			</xsl:attribute>
-			<xsl:value-of select="$name" />
+			<xsl:copy-of select="$value" />
 		</xsl:element>
 	</xsl:template>
 	

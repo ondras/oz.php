@@ -98,12 +98,10 @@
 		const COOKIE = 4;
 
 		protected $BASE = "";
-		protected $get_table = array();
-		protected $post_table = array();
+		protected $dispatch_table = array();
 
 		public function __construct() {
-			/* detect base path */
-			if (isset($_SERVER["DOCUMENT_ROOT"]) && isset($_SERVER["SCRIPT_FILENAME"])) { 
+			if (isset($_SERVER["DOCUMENT_ROOT"]) && isset($_SERVER["SCRIPT_FILENAME"])) { /* detect base path */
 				$root = $_SERVER["DOCUMENT_ROOT"];
 				$cwd = dirname($_SERVER["SCRIPT_FILENAME"]);
 
@@ -114,15 +112,32 @@
 		}
 		
 		protected function dispatch() {
-			$http_method = strtolower($_SERVER["REQUEST_METHOD"]);
-			$method = substr($_SERVER["REQUEST_URI"], strlen($this->BASE));
-			$table = ($http_method == "post" ? $this->post_table : $this->get_table);
-			if (isset($table[$method])) {
-				$methodName = $table[$method];
-				$this->$methodName();
-			} else {
-				$this->error(404);
-			}
+			$method = strtolower($_SERVER["REQUEST_METHOD"]);
+			$method = $this->requestValue("http_method", self::POST, $method);
+
+			$handler = "";
+			$resource = substr($_SERVER["REQUEST_URI"], strlen($this->BASE));
+			
+			do {
+				foreach ($this->dispatch_table as $row) {
+					$item = preg_split("/\\s+/", $row);
+					if ($item[0] != $method) { continue; }
+					preg_match("#".$item[1]."#", $resource, $matches);
+					if (!$matches) { continue; }
+					$handler = $item[2];
+					break;
+				}
+				
+				if (!$handler) { return $this->http404(); } /* does not exist in table */
+				
+				if (substr($handler, 0, 1) == "/") { /* alias to other resource */
+					$resource = $handler;
+					$handler = "";
+				}
+				
+			} while (!$handler);
+			
+			return $this->$handler($method, $matches);
 		}
 
 		/**
@@ -147,21 +162,26 @@
 			return $value;
 		}
 		
-		protected function redirect($location) {
+		protected function httpRedirect($location) {
 			if (substr($location, 0, 1) == "/") {
 				$location = $this->BASE . $location;
 			}
 			header("Location: " . $location);
 		}
 		
-		protected function status($code) {
+		protected function httpStatus($code) {
 			header("HTTP/1.1 " . $code, true, $code);
 		}
 		
-		protected function error($code) {
-			$this->status($code);
+		protected function http404() {
+			$this->httpStatus(404);
+			echo "<h1>404 Not Found</h1>";
 		}
 		
+		protected function http500() {
+			$this->httpStatus(500);
+			echo "<h1>500 Internal Server Error</h1>";
+		}
 	}
 	
 	class FILTER {

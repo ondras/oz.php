@@ -12,14 +12,15 @@
 	class APP_Test extends APP {
 		protected $db = null;
 		protected $template = null;
-		protected $get_table = array(
-			"/" => "test",
-			"/a" => "test",
-			"/b" => "test_redirect",
+		protected $dispatch_table = array(
+			"get	^/$			index",
+			"get	^/template$	template",
+			"get	^/b$		test_redirect"
 		);
 		
 		public function __construct() {
 			parent::__construct();
+
 			$this->db = new DB_Test("test");
 			$this->template = new XML();
 			$this->template->setParameter("LANGUAGE", "cz");
@@ -31,7 +32,26 @@
 			$this->dispatch();
 		}
 
-		protected function test() {
+		protected function index($method, $matches) {
+			$this->template->setTemplate("xsl/index.xsl");
+			echo $this->template->toString();
+		}
+		
+		protected function template($method, $matches) {
+			$this->template->setTemplate("xsl/template.xsl");
+			$str = "3/4 -> <- <-> => <= <=> >> << -- --- 640x480 (c) (tm) (r) 1/2 a1/2 11/2 1/2";
+			$data = array(
+				"root"=>array(
+					"id"=>"whatever",
+					""=>$str,
+					"doe"=>"<em>text with html markup</em>",
+				)
+			);
+			$this->template->setData($data);
+			echo $this->template->toString();
+		}
+
+		protected function test($method, $matches) {
 			$this->template->setTemplate("xsl/test.xsl");
 			$str = "3/4 -> <- <-> => <= <=> >> << -- --- 640x480 (c) (tm) (r) 1/2 a1/2 11/2 1/2";
 			$data = array(
@@ -46,13 +66,9 @@
 			echo $this->template->toString();
 		}
 		
-		protected function test_redirect() {
-			$this->redirect("/a");
+		protected function test_redirect($method, $matches) {
+			$this->httpRedirect("/a");
 		}
 		
-		protected function error($code) {
-			parent::error($code);
-			echo "<h1>Error $code</h1>";
-		}
 	}
 ?>
