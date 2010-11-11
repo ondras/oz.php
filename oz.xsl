@@ -30,6 +30,33 @@
 		</xsl:element>
 	</xsl:template>
 	
+	<xsl:template name="html-form">
+		<xsl:param name="action" select="''" />
+		<xsl:param name="method" />
+		<xsl:param name="content" />
+		<xsl:element name="form">
+			<xsl:attribute name="action">
+				<xsl:if test="substring($action, 1, 1) = '/'">
+					<xsl:value-of select="$BASE"/>
+				</xsl:if>
+				<xsl:value-of select="$action"/>
+			</xsl:attribute>
+			
+			<xsl:attribute name="method">
+				<xsl:choose>
+					<xsl:when test="$action = 'get'">get</xsl:when>
+					<xsl:otherwise>post</xsl:otherwise>
+				</xsl:choose>
+			</xsl:attribute>
+			
+			<xsl:if test="($method != 'get') and ($method != 'post')">
+				<input type="hidden" name="http_method" value="{$method}" />
+			</xsl:if>
+
+			<xsl:copy-of select="$content" />
+		</xsl:element>
+	</xsl:template>
+
 	<xsl:template name="html-head">
 		<xsl:param name="title" select="''" />
 		<xsl:if test="$title">

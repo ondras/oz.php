@@ -27,18 +27,22 @@
 		
 		public function setTemplate($template) {
 			$this->template = $template;
+			return $this;
 		}
 		
 		public function setParameter($name, $value) {
 			$this->parameters[$name] = $value;
+			return $this;
 		}
 		
 		public function setData($data) {
 			$this->xml->appendChild($this->arrayToNode($data));
+			return $this;
 		}
 		
 		public function addFilter($filter) {
 			$this->filters[] = $filter;
+			return $this;
 		}
 		
 		public function toString() {
@@ -51,11 +55,10 @@
 				foreach ($this->parameters as $name=>$value) {
 					$xslt->setParameter("", $name, $value);
 				}
-				$xml = $xslt->transformToDoc($this->xml); 
+				return $xslt->transformToXML($this->xml); 
 			} else {
-				$xml = $this->xml;
+				return $this->xml->saveXML();
 			}
-			return $xml->saveXML();
 		}
 		
 		protected function arrayToNode($array, $nodeName = null) {

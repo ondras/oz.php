@@ -2,7 +2,7 @@
 	error_reporting(E_ALL);
 
 	include("../oz.php");
-	include("manual.php");
+	include("demo.php");
 	
-	new APP_Test();
+	new APP_Demo();
 ?>
