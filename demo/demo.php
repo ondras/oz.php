@@ -44,7 +44,7 @@
 			$this->template->setTemplate("xsl/article.xsl");
 
 			$id = $matches[1];
-			$article = $this->db->query("SELECT * FROM article WHERE id = ?", array($id));
+			$article = $this->db->query("SELECT * FROM article WHERE id = ?", $id);
 			if (!count($article)) { return $this->http404(); }
 			$article = $article[0];
 

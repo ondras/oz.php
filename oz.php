@@ -7,7 +7,10 @@
 			$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		}
 		
-		public function query($query, $values = array()) {
+		public function query($query) {
+			$values = func_get_args();
+			array_shift($values);
+
 			$s = $this->db->prepare($query);
 			$s->execute($values);
 			$s->setFetchMode(PDO::FETCH_ASSOC);
@@ -96,10 +99,6 @@
 	}
 	
 	class APP {
-		const GET = 1;
-		const POST = 2;
-		const COOKIE = 4;
-
 		protected $BASE = "";
 		protected $dispatch_table = array();
 
@@ -116,7 +115,7 @@
 		
 		protected function dispatch() {
 			$method = strtolower($_SERVER["REQUEST_METHOD"]);
-			$method = $this->requestValue("http_method", self::POST, $method);
+			$method = $this->httpValue("http_method", "post", $method);
 
 			$handler = "";
 			$resource = substr($_SERVER["REQUEST_URI"], strlen($this->BASE));
@@ -145,17 +144,17 @@
 
 		/**
 		 * @param {string} name
-		 * @param {int} where Mix of GET/POST/COOKIE constants
+		 * @param {string} where "get"/"post"/"cookie"
 		 * @param {any} default Used when no value is specified; used to coerce return type
 		 * @returns {typeof($default)}
 		 */
-		protected function requestValue($name, $where, $default = null) {
+		protected function httpValue($name, $where, $default = null) {
 			$value = $default;
-			if (($where & self::GET) && isset($_GET[$name])) {
+			if (($where == "get") && isset($_GET[$name])) {
 				$value = $_GET[$name];
-			} elseif (($where & self::POST) && isset($_POST[$name])) {
+			} elseif (($where == "post") && isset($_POST[$name])) {
 				$value = $_POST[$name];
-			} elseif (($where & self::COOKIE) && isset($_COOKIE[$name])) {
+			} elseif (($where == "cookie") && isset($_COOKIE[$name])) {
 				$value = $_COOKIE[$name];
 			} else {
 				return $value;
