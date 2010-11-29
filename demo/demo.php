@@ -59,7 +59,7 @@
 		}
 
 		protected function language($method, $matches) {
-			HTTP::redirect($_SERVER["HTTP_REFERER"]);
+			HTTP::redirectBack();
 		}
 		
 	}

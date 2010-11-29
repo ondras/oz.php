@@ -197,6 +197,10 @@
 			header("Location: " . $location);
 		}
 		
+		public static function redirectBack() {
+			self::redirect($_SERVER["HTTP_REFERER"]);
+		}
+		
 		public static function status($code) {
 			header("HTTP/1.1 " . $code, true, $code);
 		}		
