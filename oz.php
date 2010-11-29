@@ -99,7 +99,6 @@
 	}
 	
 	class APP {
-		protected $BASE = "";
 		protected $dispatch_table = array();
 
 		public function __construct() {
@@ -108,17 +107,17 @@
 				$cwd = dirname($_SERVER["SCRIPT_FILENAME"]);
 
 				if (strpos($cwd, $root) === 0) { /* found! */
-					$this->BASE = substr($cwd, strlen($root));
+					HTTP::$BASE = substr($cwd, strlen($root));
 				}
 			}
 		}
 		
 		protected function dispatch() {
 			$method = strtolower($_SERVER["REQUEST_METHOD"]);
-			$method = $this->httpValue("http_method", "post", $method);
+			$method = HTTP::value("http_method", "post", $method);
 
 			$handler = "";
-			$resource = substr($_SERVER["REQUEST_URI"], strlen($this->BASE));
+			$resource = substr($_SERVER["REQUEST_URI"], strlen(HTTP::$BASE));
 			$resource_matched = false;
 			do {
 				foreach ($this->dispatch_table as $row) {
@@ -133,9 +132,9 @@
 				
 				if (!$handler) { 
 					if ($resource_matched) {
-						return $this->http405();
+						return $this->error405();
 					} else {
-						return $this->http404(); 
+						return $this->error404(); 
 					}
 				} /* does not exist in table */
 				
@@ -149,13 +148,33 @@
 			return $this->$handler($method, $matches);
 		}
 
+		protected function error404() {
+			HTTP::status(404);
+			echo "<h1>404 Not Found</h1>";
+		}
+		
+		protected function error405() {
+			HTTP::status(405);
+			echo "<h1>405 Method Not Allowed</h1>";
+		}
+
+		protected function error500() {
+			HTTP::status(500);
+			echo "<h1>500 Internal Server Error</h1>";
+		}
+
+	}
+
+	class HTTP {
 		/**
 		 * @param {string} name
 		 * @param {string} where "get"/"post"/"cookie"
 		 * @param {any} default Used when no value is specified; used to coerce return type
 		 * @returns {typeof($default)}
 		 */
-		protected function httpValue($name, $where, $default = null) {
+		public static $BASE = "";
+		
+		public static function value($name, $where, $default = null) {
 			$value = $default;
 			if (($where == "get") && isset($_GET[$name])) {
 				$value = $_GET[$name];
@@ -171,31 +190,16 @@
 			return $value;
 		}
 		
-		protected function httpRedirect($location) {
+		public static function redirect($location) {
 			if (substr($location, 0, 1) == "/") {
-				$location = $this->BASE . $location;
+				$location = self::$BASE . $location;
 			}
 			header("Location: " . $location);
 		}
 		
-		protected function httpStatus($code) {
+		public static function status($code) {
 			header("HTTP/1.1 " . $code, true, $code);
-		}
-		
-		protected function http404() {
-			$this->httpStatus(404);
-			echo "<h1>404 Not Found</h1>";
-		}
-		
-		protected function http405() {
-			$this->httpStatus(405);
-			echo "<h1>405 Method Not Allowed</h1>";
-		}
-
-		protected function http500() {
-			$this->httpStatus(500);
-			echo "<h1>500 Internal Server Error</h1>";
-		}
+		}		
 	}
 	
 	class FILTER {

@@ -16,7 +16,7 @@
 			$this->db = new DB("sqlite:demo.sqlite");
 			$this->template = new XML();
 			$this->template->setParameter("LANGUAGE", "cz");
-			$this->template->setParameter("BASE", $this->BASE);
+			$this->template->setParameter("BASE", HTTP::$BASE);
 			$this->template->addFilter(new FILTER_TYPO());
 			$this->template->addFilter(new FILTER_NBSP());
 			$this->template->addFilter(new FILTER_FRACTIONS());
@@ -45,7 +45,7 @@
 
 			$id = $matches[1];
 			$article = $this->db->query("SELECT * FROM article WHERE id = ?", $id);
-			if (!count($article)) { return $this->http404(); }
+			if (!count($article)) { return $this->error404(); }
 			$article = $article[0];
 
 			$this->template->setData(array(
@@ -59,7 +59,7 @@
 		}
 
 		protected function language($method, $matches) {
-			$this->httpRedirect("/");
+			HTTP::redirect($_SERVER["HTTP_REFERER"]);
 		}
 		
 	}
