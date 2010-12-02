@@ -12,7 +12,12 @@
 			array_shift($values);
 
 			$s = $this->db->prepare($query);
-			$s->execute($values);
+			
+			if (count($values) && is_array($values[0])) {
+				$s->execute($values[0]);
+			} else {
+				$s->execute($values);
+			}
 			$s->setFetchMode(PDO::FETCH_ASSOC);
 			return $s->fetchAll();
 		}
