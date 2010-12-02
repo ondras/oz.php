@@ -125,7 +125,7 @@
 					preg_match("#".$item[1]."#", $resource, $matches);
 					if (!$matches) { continue; }
 					$resource_matched = true;
-					if ($item[0] != $method) { continue; }
+					if (strtolower($item[0]) != $method) { continue; }
 					$handler = $item[2];
 					break;
 				}
