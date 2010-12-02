@@ -31,6 +31,8 @@
 
 		public function __construct() {
 			$this->xml = new DOMDocument();
+			$this->documentElement = $this->xml->createElement("data");
+			$this->xml->appendChild($this->documentElement);
 		}
 		
 		public function setTemplate($template) {
@@ -43,8 +45,8 @@
 			return $this;
 		}
 		
-		public function setData($data) {
-			$this->xml->appendChild($this->arrayToNode($data));
+		public function addData($name, $data) {
+			$this->documentElement->appendChild($this->arrayToNode($data), $name);
 			return $this;
 		}
 		
@@ -69,8 +71,8 @@
 			}
 		}
 		
-		protected function arrayToNode($array, $nodeName = null) {
-			$node = ($nodeName === null ? $this->xml->createDocumentFragment() : $this->xml->createElement($nodeName));
+		protected function arrayToNode($array, $nodeName) {
+			$node = $this->xml->createElement($nodeName);
 
 			foreach ($array as $name=>$value) {
 				if (is_array($value)) {
