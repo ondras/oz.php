@@ -32,10 +32,8 @@
 			$this->template->setTemplate("xsl/articles.xsl");
 			
 			$articles = $this->db->query("SELECT id, name, popularity FROM article");
-			$data = array("articles" => array(
-							"article" => $articles
-						));
-			$this->template->setData($data);
+			$data = array("article" => $articles);
+			$this->template->addData("articles", $data);
 			
 			echo $this->template->toString();
 		}
@@ -48,13 +46,12 @@
 			if (!count($article)) { return $this->error404(); }
 			$article = $article[0];
 
-			$this->template->setData(array(
-				"article" => array(
+			$this->template->addData("article", array(
 					"id" => $article["id"],
 					"" => $article["text"],
 					"name" => $article["name"]
 				)
-			));
+			);
 			echo $this->template->toString();
 		}
 

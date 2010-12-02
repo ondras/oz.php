@@ -13,7 +13,7 @@
 		doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
 		doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" />
 		
-	<xsl:template match="/articles">
+	<xsl:template match="//articles">
 	<html>
 		<xsl:variable name="title" select="'Articles'" />
 		<xsl:call-template name="head">

@@ -13,7 +13,7 @@
 		doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
 		doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" />
 		
-	<xsl:template match="/article">
+	<xsl:template match="//article">
 	<html>
 		<xsl:variable name="title" select="concat('Article &quot;', @name, '&quot;')" />
 		<xsl:call-template name="head">

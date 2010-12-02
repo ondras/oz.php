@@ -46,7 +46,7 @@
 		}
 		
 		public function addData($name, $data) {
-			$this->documentElement->appendChild($this->arrayToNode($data), $name);
+			$this->documentElement->appendChild($this->arrayToNode($data, $name));
 			return $this;
 		}
 		
