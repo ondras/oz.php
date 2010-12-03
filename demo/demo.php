@@ -24,11 +24,11 @@
 			$this->dispatch();
 		}
 
-		protected function index($method, $matches) {
+		protected function index($matches) {
 			echo $this->template->setTemplate("xsl/index.xsl")->toString();
 		}
 		
-		protected function articles($method, $matches) {
+		protected function articles($matches) {
 			$this->template->setTemplate("xsl/articles.xsl");
 			
 			$articles = $this->db->query("SELECT id, name, popularity FROM article");
@@ -38,7 +38,7 @@
 			echo $this->template->toString();
 		}
 
-		protected function article($method, $matches) {
+		protected function article($matches) {
 			$this->template->setTemplate("xsl/article.xsl");
 
 			$id = $matches[1];
@@ -55,7 +55,7 @@
 			echo $this->template->toString();
 		}
 
-		protected function language($method, $matches) {
+		protected function language($matches) {
 			HTTP::redirectBack();
 		}
 		

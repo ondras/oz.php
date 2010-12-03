@@ -152,7 +152,7 @@
 				
 			} while (!$handler);
 			
-			return $this->$handler($method, $matches);
+			return $this->$handler($matches);
 		}
 
 		protected function error404() {
