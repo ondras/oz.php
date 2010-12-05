@@ -3,7 +3,6 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:param name="LANGUAGE" select="'en'" />
 	<xsl:param name="STRINGS" select="document('../locale/locale.xml')" />
-	<xsl:include href="../../oz.xsl" />
 	<xsl:include href="includes.xsl" />
 
     <xsl:output 
@@ -39,13 +38,9 @@
 						<tr>
 							<td><xsl:value-of select="@id" /></td>
 							<td>
-								<xsl:call-template name="html-link">
-									<xsl:with-param name="href">
-										<xsl:text>/article/</xsl:text>
-										<xsl:value-of select="@id" />
-									</xsl:with-param>
-									<xsl:with-param name="value"><xsl:value-of select="@name" /></xsl:with-param> 
-								</xsl:call-template>
+								<a href="{concat($BASE, '/article/', @id)}">
+									<xsl:value-of select="@name" />
+								</a>
 							</td>
 							<td><xsl:value-of select="@popularity" /></td>
 						</tr>

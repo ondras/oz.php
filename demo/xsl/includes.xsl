@@ -1,12 +1,13 @@
 <?xml version="1.0" ?>
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+	<xsl:include href="../../_.xsl" />
+
 	<xsl:template name="head">
 		<xsl:param name="title" />
 		<head>
-			<xsl:call-template name="html-head">
-				<xsl:with-param name="title" select="$title" />
-			</xsl:call-template>
+			<title><xsl:value-of select="$title" /></title>
+			<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 			<style>
 				body {
 					font-family: georgia;
@@ -53,40 +54,24 @@
 		<div id="menu">
 			<ul>
 				<li>
-					<xsl:call-template name="html-link">
-						<xsl:with-param name="value" select="'Home'" />
-						<xsl:with-param name="href" select="'/'" />
-					</xsl:call-template>
+					<a href="{concat($BASE, '/')}">Home</a>
 				</li>
 				<li>
-					<xsl:call-template name="html-link">
-						<xsl:with-param name="value" select="'Articles'" />
-						<xsl:with-param name="href" select="'/articles'" />
-					</xsl:call-template>
+					<a href="{concat($BASE, '/articles')}">Articles</a>
 				</li>
 				<li>
 					<xsl:call-template name="_">
 						<xsl:with-param name="key">Language</xsl:with-param>
 					</xsl:call-template>:
-					<xsl:call-template name="html-form">
-						<xsl:with-param name="action" select="'/language'" />
-						<xsl:with-param name="method" select="'post'" />
-						<xsl:with-param name="content">
-							<input type="submit" name="language" value="en" />
-							<input type="submit" name="language" value="cs" />
-						</xsl:with-param>
-					</xsl:call-template>
+					<form method="post" action="{concat($BASE, '/language')}">
+						<input type="submit" name="language" value="en" />
+						<input type="submit" name="language" value="cs" />
+					</form>
 				</li>
 				<li>
 					Sources: [
-					<xsl:call-template name="html-link">
-						<xsl:with-param name="value" select="'index'" />
-						<xsl:with-param name="href" select="'/index.phps'" />
-					</xsl:call-template> | 
-					<xsl:call-template name="html-link">
-						<xsl:with-param name="value" select="'demo'" />
-						<xsl:with-param name="href" select="'/demo.phps'" />
-					</xsl:call-template>
+					<a href="{concat($BASE, '/index.phps')}">index</a> |
+					<a href="{concat($BASE, '/demo.phps')}">demo</a>
 					]
 				</li>
 			</ul>

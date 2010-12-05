@@ -3,7 +3,6 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:param name="LANGUAGE" select="'en'" />
 	<xsl:param name="STRINGS" select="document('../locale/locale.xml')" />
-	<xsl:include href="../../oz.xsl" />
 	<xsl:include href="includes.xsl" />
 
     <xsl:output 

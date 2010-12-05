@@ -21,6 +21,37 @@
 			$s->setFetchMode(PDO::FETCH_ASSOC);
 			return $s->fetchAll();
 		}
+		
+		public function insert($table, $values) {
+			$query = "INSERT INTO ".$table. "(";
+			$query .= implode(",", array_keys($values));
+			$query .= ") VALUES (";
+			
+			$params = array();
+			foreach ($values as $value) {
+				if (count($params)) { $query .= ","; }
+				$params[] = $value;
+				$query .= "?";
+			}
+			
+			return $this->query($query, $params);
+		}
+		
+		public function edit($table, $id, $values) {
+			$query = "UPDATE ".$table." SET ";
+			$params = array();
+			
+			foreach ($values as $key=>$value) {
+				if (count($params)) { $query .= ","; }
+				$params[] = $value;
+				$query .= $key."=?";
+			}
+			
+			$query .= " WHERE id=?";
+			$params[] = $id;
+			
+			return $this->query($query, $params);
+		}
 	}
 	
 	class XML {
