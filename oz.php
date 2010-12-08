@@ -140,7 +140,7 @@
 
 			return $node;
 		}
-		
+
 		protected function filter($str) {
 			for ($i=0;$i<count($this->filters);$i++) {
 				$str = $this->filters[$i]->apply($str);
@@ -153,14 +153,6 @@
 		protected $dispatch_table = array();
 
 		public function __construct() {
-			if (isset($_SERVER["DOCUMENT_ROOT"]) && isset($_SERVER["SCRIPT_FILENAME"])) { /* detect base path */
-				$root = $_SERVER["DOCUMENT_ROOT"];
-				$cwd = dirname($_SERVER["SCRIPT_FILENAME"]);
-
-				if (strpos($cwd, $root) === 0) { /* found! */
-					HTTP::$BASE = substr($cwd, strlen($root));
-				}
-			}
 		}
 		
 		protected function dispatch() {
@@ -255,6 +247,15 @@
 		public static function status($code) {
 			header("HTTP/1.1 " . $code, true, $code);
 		}		
+	}
+
+	if (isset($_SERVER["DOCUMENT_ROOT"]) && isset($_SERVER["SCRIPT_FILENAME"])) { /* detect base path */
+		$root = $_SERVER["DOCUMENT_ROOT"];
+		$cwd = dirname($_SERVER["SCRIPT_FILENAME"]);
+
+		if (strpos($cwd, $root) === 0) { /* found! */
+			HTTP::$BASE = substr($cwd, strlen($root));
+		}
 	}
 	
 	class FILTER {
