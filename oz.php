@@ -1,9 +1,14 @@
 <?php
+	function error_handler($no, $str, $file, $line) {
+		throw new ErrorException($str, 0, $no, $file, $line);
+	}
+	set_error_handler("error_handler");
+
 	class DB {
 		protected $db = null;
 		
-		public function __construct($dsn, $username = "", $password = "") {
-			$this->db = new PDO($dsn, $username, $password);
+		public function __construct($dsn, $username = "", $password = "", $driver_options = array()) {
+			$this->db = new PDO($dsn, $username, $password, $driver_options);
 			$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		}
 		
@@ -18,8 +23,15 @@
 			} else {
 				$s->execute($values);
 			}
+
 			$s->setFetchMode(PDO::FETCH_ASSOC);
-			return $s->fetchAll();
+			
+			if ($s->columnCount()) {
+				return $s->fetchAll();
+			} else {
+				return true;
+			}
+				
 		}
 		
 		public function insert($table, $values) {
@@ -33,6 +45,7 @@
 				$params[] = $value;
 				$query .= "?";
 			}
+			$query .= ")";
 			
 			return $this->query($query, $params);
 		}
@@ -96,7 +109,7 @@
 				foreach ($this->parameters as $name=>$value) {
 					$xslt->setParameter("", $name, $value);
 				}
-				return $xslt->transformToXML($this->xml); 
+				return $xslt->transformToXML($this->xml);
 			} else {
 				return $this->xml->saveXML();
 			}
@@ -159,7 +172,7 @@
 			$resource_matched = false;
 			do {
 				foreach ($this->dispatch_table as $row) {
-					$item = preg_split("/\\s+/", $row);
+					$item = preg_split('/\s+/', $row);
 					preg_match("#".$item[1]."#", $resource, $matches);
 					if (!$matches) { continue; }
 					$resource_matched = true;
