@@ -47,10 +47,11 @@
 			}
 			$query .= ")";
 			
-			return $this->query($query, $params);
+			$this->query($query, $params);
+			return $this->db->lastInsertId();
 		}
 		
-		public function edit($table, $id, $values) {
+		public function update($table, $id, $values) {
 			$query = "UPDATE ".$table." SET ";
 			$params = array();
 			
@@ -60,9 +61,17 @@
 				$query .= $key."=?";
 			}
 			
-			$query .= " WHERE id=?";
-			$params[] = $id;
-			
+			$id_name = "id";
+			$id_value = $id;
+			if (is_array($id)) {
+				$keys = array_keys($id);
+				$id_name = array_shift($keys);
+				$id_value = $id[$id_name];
+			}
+
+			$query .= " WHERE ".$id_name." = ?";
+			$params[] = $id_value;
+
 			return $this->query($query, $params);
 		}
 	}
@@ -162,6 +171,10 @@
 
 			$handler = "";
 			$resource = substr($_SERVER["REQUEST_URI"], strlen(HTTP::$BASE));
+			
+			$qs = strpos($resource, "?");
+			if ($qs !== false) { $resource = substr($resource, 0, $qs); }
+
 			$resource_matched = false;
 			do {
 				foreach ($this->dispatch_table as $row) {
