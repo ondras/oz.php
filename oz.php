@@ -152,9 +152,10 @@
 	class APP {
 		protected $dispatch_table = array();
 
-		public function __construct() {
+		protected function __call($name, $arguments) {
+			$this->error501();
 		}
-		
+
 		protected function dispatch() {
 			$method = strtolower($_SERVER["REQUEST_METHOD"]);
 			$method = HTTP::value("http_method", "post", $method);
@@ -206,6 +207,10 @@
 			echo "<h1>500 Internal Server Error</h1>";
 		}
 
+		protected function error501() {
+			HTTP::status(501);
+			echo "<h1>501 Not Implemented</h1>";
+		}
 	}
 
 	class HTTP {
