@@ -46,7 +46,6 @@
 				$query .= "?";
 			}
 			$query .= ")";
-			
 			$this->query($query, $params);
 			return $this->db->lastInsertId();
 		}
@@ -74,6 +73,26 @@
 
 			return $this->query($query, $params);
 		}
+		
+		public function delete($table, $id = null) {
+			$query = "DELETE FROM ".$table;
+			$params = array();
+			
+			if ($id) {
+				$id_name = "id";
+				$id_value = $id;
+				if (is_array($id)) {
+					$keys = array_keys($id);
+					$id_name = array_shift($keys);
+					$id_value = $id[$id_name];
+				}
+				
+				$query .= " WHERE ".$id_name." = ?";
+				$params[] = $id_value;
+			}
+			return $this->query($query, $params);
+		}
+		
 	}
 	
 	class XML {
