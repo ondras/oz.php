@@ -1,7 +1,7 @@
 <?php
 	class APP_Demo extends APP {
 		protected $db = null;
-		protected $template = null;
+		protected $view = null;
 
 		protected $dispatch_table = array(
 			"get	^/$					index",
@@ -11,51 +11,53 @@
 		);
 		
 		public function __construct() {
-			parent::__construct();
-
 			$this->db = new DB("sqlite:demo.sqlite");
-			$this->template = new XML();
-			$this->template->setParameter("LANGUAGE", "cz");
-			$this->template->setParameter("BASE", HTTP::$BASE);
-			$this->template->addFilter(new FILTER_TYPO());
-			$this->template->addFilter(new FILTER_NBSP());
-			$this->template->addFilter(new FILTER_FRACTIONS());
+			$this->view = new XML();
+			
+			$language = HTTP::value("language", "cookie", "cz");
+			$this->view->setParameter("LANGUAGE", $language);
+			$this->view->setParameter("BASE", HTTP::$BASE);
+			$this->view->addFilter(new FILTER_TYPO());
+			$this->view->addFilter(new FILTER_NBSP());
+			$this->view->addFilter(new FILTER_FRACTIONS());
 			
 			$this->dispatch();
 		}
 
 		protected function index($matches) {
-			echo $this->template->setTemplate("xsl/index.xsl")->toString();
+			echo $this->view->setTemplate("xsl/index.xsl")->toString();
 		}
 		
 		protected function articles($matches) {
-			$this->template->setTemplate("xsl/articles.xsl");
+			$this->view->setTemplate("xsl/articles.xsl");
 			
 			$articles = $this->db->query("SELECT id, name, popularity FROM article");
 			$data = array("article" => $articles);
-			$this->template->addData("articles", $data);
+			$this->view->addData("articles", $data);
 			
-			echo $this->template->toString();
+			echo $this->view->toString();
 		}
 
 		protected function article($matches) {
-			$this->template->setTemplate("xsl/article.xsl");
+			$this->view->setTemplate("xsl/article.xsl");
 
 			$id = $matches[1];
 			$article = $this->db->query("SELECT * FROM article WHERE id = ?", $id);
 			if (!count($article)) { return $this->error404(); }
 			$article = $article[0];
 
-			$this->template->addData("article", array(
+			$this->view->addData("article", array(
 					"id" => $article["id"],
 					"" => $article["text"],
 					"name" => $article["name"]
 				)
 			);
-			echo $this->template->toString();
+			echo $this->view->toString();
 		}
 
 		protected function language($matches) {
+			$language = HTTP::value("language", "post", "");
+			if ($language) { setcookie("language", $language); }
 			HTTP::redirectBack();
 		}
 		
