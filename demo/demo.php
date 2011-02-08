@@ -14,7 +14,7 @@
 			$this->db = new DB("sqlite:demo.sqlite");
 			$this->view = new XML();
 			
-			$language = HTTP::value("language", "cookie", "cz");
+			$language = HTTP::value("language", "cookie", "cs");
 			$this->view->setParameter("LANGUAGE", $language);
 			$this->view->setParameter("BASE", HTTP::$BASE);
 			$this->view->addFilter(new FILTER_TYPO());
