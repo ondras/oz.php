@@ -224,6 +224,11 @@
 			return $this->$handler($matches);
 		}
 
+		protected function error403() {
+			HTTP::status(403);
+			echo "<h1>403 Not Authorized</h1>";
+		}
+
 		protected function error404() {
 			HTTP::status(404);
 			echo "<h1>404 Not Found</h1>";
