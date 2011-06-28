@@ -180,7 +180,7 @@
 	class APP {
 		protected $dispatch_table = array();
 
-		protected function __call($name, $arguments) {
+		public function __call($name, $arguments) {
 			$this->error501();
 		}
 
