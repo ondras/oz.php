@@ -1,9 +1,12 @@
 <?php
 	function error_handler($no, $str, $file, $line) {
-		throw new ErrorException($str, 0, $no, $file, $line);
+		throw new ErrorException($str, $no, 0, $file, $line);
 	}
 	set_error_handler("error_handler");
 
+	/**
+	 * Database helper class
+	 */
 	class DB {
 		protected $db = null;
 		
@@ -34,7 +37,7 @@
 				
 		}
 		
-		public function insert($table, $values) {
+		public function insert($table, $values = array()) {
 			$query = "INSERT INTO ".$table. "(";
 			$query .= implode(",", array_keys($values));
 			$query .= ") VALUES (";
@@ -50,7 +53,7 @@
 			return $this->db->lastInsertId();
 		}
 		
-		public function update($table, $id, $values) {
+		public function update($table, $id, $values = array()) {
 			$query = "UPDATE ".$table." SET ";
 			$params = array();
 			
@@ -60,16 +63,18 @@
 				$query .= $key."=?";
 			}
 			
-			$id_name = "id";
-			$id_value = $id;
-			if (is_array($id)) {
-				$keys = array_keys($id);
-				$id_name = array_shift($keys);
-				$id_value = $id[$id_name];
-			}
+			if ($id) {
+				$id_name = "id";
+				$id_value = $id;
+				if (is_array($id)) {
+					$keys = array_keys($id);
+					$id_name = array_shift($keys);
+					$id_value = $id[$id_name];
+				}
 
-			$query .= " WHERE ".$id_name." = ?";
-			$params[] = $id_value;
+				$query .= " WHERE ".$id_name." = ?";
+				$params[] = $id_value;
+			}
 
 			return $this->query($query, $params);
 		}
@@ -95,6 +100,9 @@
 		
 	}
 	
+	/**
+	 * XML (+XSLT) output class
+	 */
 	class XML {
 		protected $filters = array();
 		protected $template = null;
@@ -144,18 +152,19 @@
 		}
 		
 		protected function arrayToNode($array, $nodeName) {
+			$test = each($array);
+			if (is_numeric($test[0])) {
+				$frag = $this->xml->createDocumentFragment();
+				foreach ($array as $item) {
+					$frag->appendChild($this->arrayToNode($item, $nodeName));
+				}
+				return $frag;
+			}
+			
 			$node = $this->xml->createElement($nodeName);
-
 			foreach ($array as $name=>$value) {
 				if (is_array($value)) {
-					$test = each($value);
-					if (is_numeric($test[0])) { /* numbered array - set of children */
-						foreach ($value as $child) {
-							$node->appendChild($this->arrayToNode($child, $name));
-						}
-					} else { /* associative array - one child */
-						$node->appendChild($this->arrayToNode($value, $name));
-					}
+					$node->appendChild($this->arrayToNode($value, $name));
 				} else {
 					$value = $this->filter($value);
 					if ($name === "") {
@@ -165,7 +174,6 @@
 					}
 				}
 			}
-
 			return $node;
 		}
 
@@ -177,6 +185,9 @@
 		}
 	}
 	
+	/**
+	 * Base web application
+	 */
 	class APP {
 		protected $dispatch_table = array();
 
@@ -186,7 +197,7 @@
 
 		protected function dispatch() {
 			$method = strtolower($_SERVER["REQUEST_METHOD"]);
-			$method = HTTP::value("http_method", "post", $method);
+			$method = HTTP::value("http-method", "post", $method);
 
 			$handler = "";
 			$resource = substr($_SERVER["REQUEST_URI"], strlen(HTTP::$BASE));
@@ -221,44 +232,72 @@
 				
 			} while (!$handler);
 			
-			return $this->$handler($matches);
+			$instance = $this;
+			$dotpos = strpos($handler, ".");
+			if ($dotpos !== false) {
+				$class = substr($handler, 0, $dotpos);
+				if (!class_exists($class)) { throw new ErrorException("Class '".$class."' not available", 0, 0, __FILE__, __LINE__); }
+				$instance = new $class($this);
+				$handler = substr($handler, $dotpos+1);
+			}
+			
+			return $instance->$handler($matches);
 		}
 
-		protected function error403() {
+		public function error403() {
 			HTTP::status(403);
 			echo "<h1>403 Not Authorized</h1>";
 		}
 
-		protected function error404() {
+		public function error404() {
 			HTTP::status(404);
 			echo "<h1>404 Not Found</h1>";
 		}
 		
-		protected function error405() {
+		public function error405() {
 			HTTP::status(405);
 			echo "<h1>405 Method Not Allowed</h1>";
 		}
 
-		protected function error500() {
+		public function error500() {
 			HTTP::status(500);
 			echo "<h1>500 Internal Server Error</h1>";
 		}
 
-		protected function error501() {
+		public function error501() {
 			HTTP::status(501);
 			echo "<h1>501 Not Implemented</h1>";
 		}
 	}
+	
+	/**
+	 * Application extension - module class
+	 */
+	class MODULE {
+		protected $app;
+		
+		public function __construct($app) {
+			$this->app = $app;
+		}
+		
+		public function __call($name, $arguments) {
+			return call_user_func_array(array($this->app, $name), $arguments);
+		}
+	}
 
+	/**
+	 * Static HTTP helper
+	 */
 	class HTTP {
+		public static $BASE = "";
+		public static $REFERER = "";
+		
 		/**
 		 * @param {string} name
-		 * @param {string} where "get"/"post"/"cookie"
+		 * @param {string} where "get"/"post"/"cookie"/"files"
 		 * @param {any} default Used when no value is specified; used to coerce return type
 		 * @returns {typeof($default)}
 		 */
-		public static $BASE = "";
-		
 		public static function value($name, $where, $default = null) {
 			$value = $default;
 			if (($where == "get") && isset($_GET[$name])) {
@@ -267,6 +306,8 @@
 				$value = $_POST[$name];
 			} elseif (($where == "cookie") && isset($_COOKIE[$name])) {
 				$value = $_COOKIE[$name];
+			} elseif (($where == "files") && isset($_FILES[$name])) {
+				$value = $_FILES[$name];
 			} else {
 				return $value;
 			}
@@ -283,12 +324,12 @@
 		}
 		
 		public static function redirectBack() {
-			self::redirect($_SERVER["HTTP_REFERER"]);
+			self::redirect(self::$REFERER);
 		}
 		
 		public static function status($code) {
 			header("HTTP/1.1 " . $code, true, $code);
-		}		
+		}
 	}
 
 	if (isset($_SERVER["DOCUMENT_ROOT"]) && isset($_SERVER["SCRIPT_FILENAME"])) { /* detect base path */
@@ -300,6 +341,11 @@
 		}
 	}
 	
+	if (isset($_SERVER["HTTP_REFERER"])) { HTTP::$REFERER = $_SERVER["HTTP_REFERER"]; }
+	
+	/**
+	 * XML output filter
+	 */
 	class FILTER {
 		public function __construct() {
 		}
