@@ -34,7 +34,6 @@
 			} else {
 				return true;
 			}
-				
 		}
 		
 		public function insert($table, $values = array()) {
@@ -141,6 +140,7 @@
 				$xsl = new DOMDocument();
 				$xsl->load($this->template, LIBXML_NOCDATA);
 				$xslt = new XSLTProcessor();
+				$xslt->registerPHPFunctions(["date"]);
 				$xslt->importStylesheet($xsl);
 				foreach ($this->parameters as $name=>$value) {
 					$xslt->setParameter("", $name, $value);
@@ -152,8 +152,8 @@
 		}
 		
 		protected function arrayToNode($array, $nodeName) {
-			$test = each($array);
-			if (is_numeric($test[0])) {
+			$test = count($array) > 0 ? array_keys($array)[0]: NULL;
+			if (is_numeric($test)) {
 				$frag = $this->xml->createDocumentFragment();
 				foreach ($array as $item) {
 					$frag->appendChild($this->arrayToNode($item, $nodeName));
@@ -336,7 +336,7 @@
 		$root = $_SERVER["DOCUMENT_ROOT"];
 		$cwd = dirname($_SERVER["SCRIPT_FILENAME"]);
 
-		if (strpos($cwd, $root) === 0) { /* found! */
+		if ($root && strpos($cwd, $root) === 0) { /* found! */
 			HTTP::$BASE = substr($cwd, strlen($root));
 		}
 	}
